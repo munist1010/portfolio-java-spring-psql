@@ -1,25 +1,31 @@
-package com.munist.project.java.springboot.project;
+package com.munist.project.java.springboot.project.web;
 
+import java.io.IOException;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
+
+import com.munist.project.java.springboot.project.model.Image;
+import com.munist.project.java.springboot.project.service.munistService;
+
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestPart;
 
 
 @RestController
 public class munistController {
 
-    private Map<String, Image> db = new HashMap<>() {{
-        put("1", new Image("1", "test.jpg"));
-    }};
+    private final munistService munistService;
+
+    public munistController(munistService munistService) {
+        this.munistService = munistService;
+    }
     @GetMapping("/")
     public String get() {
         return "The start of the REST service";
@@ -27,28 +33,26 @@ public class munistController {
 
     @GetMapping("/images") 
         public Collection<Image> getImages() {
-            return db.values();
+            return munistService.get();
         };
         
     @GetMapping("/images/{id}")
         public Image getImageById(@PathVariable String id) {
-            Image image = db.get(id);
+            Image image = munistService.get(id);
             if (image == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND);
             return image;
 
         }
     
-    @DeleteMapping("/images")
+    @DeleteMapping("/images{id}")
     public void deleteImage(@PathVariable String id) {
-        Image image = db.remove(id);
+        Image image = munistService.remove(id);
         if (image == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND);
     }
 
-    @PostMapping("/images/")
-    public Image postImage(Image image) {
-        image.setId(UUID.randomUUID().toString());
-        db.put(image.getId(), image);
-        return image;
+    @PostMapping("/images") 
+    public Image postImage(@RequestPart("data") MultipartFile file) throws IOException {
+        return munistService.save(file.getOriginalFilename(), file.getContentType() ,file.getBytes());
     }
     
 }

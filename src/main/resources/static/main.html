@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Java-Spring-Boot Project</title>
+</head>
+<body>
+    
+    <h2>Image Upload</h2>
+
+    <input id="imageupload" type="file" name="imageupload" />
+    <button id="upload-btn" onclick="uploadImage()"> Upload an image</button>
+
+    <script>
+        async function uploadImage() {
+            let formData = new FormData();
+            formData.append("data", imageupload.files[0]);
+            await fetch('http://localhost:8080/images', {
+                method: "POST",
+                body: formData
+            }).then(result => result.text())
+                .then(text => alert(text));
+        }
+    </script>
+    <noscript>
+        You must have JavaScript enabled to see some features on this page
+    </noscript>
+</body>
+</html>
